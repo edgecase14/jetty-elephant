@@ -260,10 +260,14 @@ public class SrvApp
                         // TURN OFF FOR PROD!  DROPS TABLES AND ALL DATA IS LOST!
                         //.setProperty(AvailableSettings.JAKARTA_HBM2DDL_DATABASE_ACTION, Action.SPEC_ACTION_DROP_AND_CREATE) // is this same as above?
 
-                        // use to get db connection error messages
+                        // in 6.5.2 had to use to get db connection error messages
                         //.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect")
+
                         // Create a new SessionFactory
                         .buildSessionFactory();
+                        // without Dialect set, 2 stack traces if postgres connection fails in 6.5.2 but 7.1.0 seems to give same error as Dialset Set case
+                        // with Dialect set, org.postgresql.util.PSQLException: The connection attempt failed. is re-thrown, maybe catch that
+                        // and present to user
 
         System.out.println("postgres server version check...");
         try (org.hibernate.Session hsession = sf.openSession()) {
