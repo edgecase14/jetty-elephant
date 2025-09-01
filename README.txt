@@ -1,10 +1,10 @@
 Demonstration of all of the following thrown together.  Shaken, not stirred.
 
 -Java VirtualThreads, 1 thread per HTTP session, application uses plain blocking code
--HTTP/3, Jetty Embedded
+-HTTP/3, Jetty Embedded, event driven Javascript + Java backend
 -Server Sent Events (SSE) aka browser Javascript EventSource
 -Hibernate with Unix Domain Sockets via junixsocket
--PostGis
+-PostGis and OpenLayers
 -HTML CustomElement
 -browser importmap
 -IPv6
@@ -12,6 +12,8 @@ Demonstration of all of the following thrown together.  Shaken, not stirred.
 -Active Directory user lookup via LDAP
 -systemd service status
 -ACME certificate management, live reloading
+-Umple state machine, persisted with Hibernate
+-Typescript using exported types from Java
 
 production configuration settings:
 
