@@ -83,7 +83,7 @@ public class ThreadTypeHandler extends Handler.Wrapper {
                     var setCtlr = new SetController();
                     // class should be based on the URL path - /ctlr/tsc2 = TscController
                     // generate this mapping using an Annotation?
-                    var tsc = (GenericController) ctl_class.newInstance();
+                    var tsc = (GenericController) ctl_class.getDeclaredConstructor().newInstance();
                     ((TscController) tsc).querySetup(queryMap);  // can this be merged with queryNavigated()?
                     //if (user != null) {
                     //    setCtlr.user = user; // let controller do Hibernate find(TsUser.class) since we can't block in handler
