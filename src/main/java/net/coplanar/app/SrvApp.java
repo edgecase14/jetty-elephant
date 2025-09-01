@@ -560,6 +560,7 @@ public class SrvApp
         src.setSniHostCheck(false); // INSECURE
         secureConfig.addCustomizer(src);
         secureConfig.addCustomizer(new AltSvcHeaderCustomizer("h3=\":443\"; ma=86400, h2=\":443\"; ma=86400"));
+	// what about HSTS?
         
         // First, create the secure connector for HTTPS and HTTP/2.
         HttpConnectionFactory https = new HttpConnectionFactory(secureConfig);

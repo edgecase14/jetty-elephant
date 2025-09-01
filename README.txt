@@ -1,3 +1,18 @@
+Demonstration of all of the following thrown together.  Shaken, not stirred.
+
+-Java VirtualThreads, 1 thread per HTTP session, application uses plain blocking code
+-HTTP/3, Jetty Embedded
+-Server Sent Events (SSE) aka browser Javascript EventSource
+-Hibernate with Unix Domain Sockets via junixsocket
+-PostGis
+-HTML CustomElement
+-browser importmap
+-IPv6
+-HTTP authentication Negitiate/Kerberos or mTLS (Client Certificate)
+-Active Directory user lookup via LDAP
+-systemd service status
+-ACME certificate management, live reloading
+
 production configuration settings:
 
 jaas.conf: Kerberos keytab and service principal name
