@@ -302,7 +302,7 @@ public class SrvApp
         //env.put(Context.SECURITY_AUTHENTICATION, "none");
         env.put(Context.SECURITY_PRINCIPAL, "CN=http-mjolnir,CN=Users,DC=ad,DC=coplanar,DC=net");
         // would be nice to be able to use the kerberos srvtab instead of a password
-        env.put(Context.SECURITY_CREDENTIALS, "2kewl2kewlZZ!!");
+        env.put(Context.SECURITY_CREDENTIALS, "arglebargleZZ!!");
         // something about Active Directory and unprocessed referals
         env.put(Context.REFERRAL, "follow");
 

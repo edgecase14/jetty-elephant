@@ -23,7 +23,6 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import javax.security.auth.Subject;
 import net.coplanar.updatemsg.SetController;
 import org.eclipse.jetty.util.Callback;
 
@@ -38,7 +37,7 @@ public class GenericThread implements Runnable {
     List<UpdateMessage> ul;
     org.hibernate.Session hsession;
     private Response resp;
-    private Subject subj;
+    private List<Principal> userGroups = new ArrayList<>();
     String username;
     private GenericController ctlr = null;
 
@@ -47,10 +46,10 @@ public class GenericThread implements Runnable {
     //    this.myQueue = myq;
     //    this.ses = ses;
     //}
-    final public void setMyQueueSes(BlockingQueue<UpdateMessage> myq, Session ses, Subject subject) {
+    final public void setMyQueueSes(BlockingQueue<UpdateMessage> myq, Session ses, String user) {
         this.myQueue = myq;
         this.ses = ses;
-        this.subj = subject;
+        this.username = user;
     }
 
     final void addResponseObj(UpdateMessage msg) {
@@ -80,11 +79,6 @@ public class GenericThread implements Runnable {
         try {
             System.out.println("new GenericThread.");
 
-            var princ = subj.getPrincipals();
-            for (Principal p : princ) {
-                // last one wins?
-                username = p.getName();
-            }
             if (username == null) {
                 // problem
             }
@@ -133,7 +127,7 @@ public class GenericThread implements Runnable {
                             String val = (String) allVals.next();
                             //System.out.println(val);
                             // mapping function?
-                            princ.add(new UserPrincipal(val));
+                            userGroups.add(new UserPrincipal(val));
                         }
                     }
 
@@ -145,7 +139,7 @@ public class GenericThread implements Runnable {
                 Logger.getLogger(GenericThread.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            System.out.println("Subject with groups: " + subj);
+            System.out.println("User groups: " + userGroups);
 
             hsession = SrvApp.sf.openSession();
 

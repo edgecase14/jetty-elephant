@@ -12,7 +12,6 @@ import org.apache.directory.server.kerberos.shared.keytab.Keytab;
 import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
 import org.ietf.jgss.*;
 
-import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosKey;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import java.io.File;
@@ -77,8 +76,6 @@ public class KerberosKeytabReader {
 
     public static GSSCredential createGSSCredential(List<KeytabEntry> entries) throws GSSException {
         GSSManager manager = GSSManager.getInstance();
-        Subject subject = new Subject();
-//        Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
         // needed for HTTP Negotiate auth
         Oid krb5Oid = new Oid("1.3.6.1.5.5.2");
 
@@ -86,23 +83,14 @@ public class KerberosKeytabReader {
             String principalName = entry.getPrincipalName().split("@")[0];  // remove realm - does it break for cross-realm names?
             GSSName gssName = manager.createName(principalName, GSSName.NT_USER_NAME);
             gssServiceName = gssName;
-
-            // Create a KerberosKey from the keytab data
-            KerberosPrincipal principal = new KerberosPrincipal(principalName);
-            KerberosKey kerberosKey = new KerberosKey(principal, entry.getKey().getKeyValue(), entry.getKey().getKeyType().getOrdinal(), entry.getKey().getKeyVersion());
-
-            subject.getPrivateCredentials().add(kerberosKey);
-            subject.getPrincipals().add(principal);
         }
 
-        // Perform privileged action as the subject to create GSSCredential
-        return Subject.doAs(subject, (PrivilegedAction<GSSCredential>) () -> {
-            try {
-                return manager.createCredential(gssServiceName, GSSCredential.DEFAULT_LIFETIME, krb5Oid, GSSCredential.ACCEPT_ONLY);
-            } catch (GSSException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        // Create GSSCredential directly
+        try {
+            return manager.createCredential(gssServiceName, GSSCredential.DEFAULT_LIFETIME, krb5Oid, GSSCredential.ACCEPT_ONLY);
+        } catch (GSSException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static GSSContext createGSSContext(GSSCredential credential, String serviceName, String realm) throws GSSException {

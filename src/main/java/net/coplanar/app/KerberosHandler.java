@@ -18,7 +18,6 @@ import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
-import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import java.security.cert.X509Certificate;
@@ -100,6 +99,8 @@ public class KerberosHandler extends Handler.Wrapper {
             // TODO - mapping function?
             username = certuser;
             request.setAttribute("user", certuser);
+            var ses_for_cert = request.getSession(true);
+            ses_for_cert.setAttribute("username", username);
             // how about create a new Subject(), and add a Principal?
             // LDAP login module can be run on vthread, let ldap client block all it wants
             authSucceeded = true;
@@ -176,10 +177,13 @@ public class KerberosHandler extends Handler.Wrapper {
 
 
             } catch (GSSException e) {
+                e.printStackTrace();
                 response.setStatus(401);
                 //response.getHeaders().put(HttpHeader.CONTENT_TYPE, "text/html; charset=UTF-8");
                 Content.Sink.write(response, true, "Kerberos Authentication Error", callback);
                 System.out.println(e);
+		// GSSException: Failure unspecified at GSS-API level (Mechanism level: Checksum failed)
+		//  -did our service keytab get out of date due to service account pw change?
                 return true;
             }
         }
@@ -188,7 +192,7 @@ public class KerberosHandler extends Handler.Wrapper {
             //return super.handle(request, response, callback);
             // alternatively
             var ses = request.getSession(true);
-            // put Subject into Session
+            ses.setAttribute("username", username);
             // ThreadSessionLifecycleListener logic here, now with access to Subject earlier
             
             String sid = ses.getId();
@@ -216,16 +220,11 @@ public class KerberosHandler extends Handler.Wrapper {
                     // class should be based on the URL path - /ctlr/tsc2 = TscThread
                     // generate this mapping using an Annotation?
 
-                    var subject = new Subject();
-                    var p = new UserPrincipal(username);
-                    subject.getPrincipals().add(p);
-     //               ses.setAttribute("userSubject", subject);
-
                     // chicken vs egg: can't set on Session until after this
                     // String threadType = (String) ses.getAttribute("threadType");
                     sessThread = new GenericThread();
                     
-                    sessThread.setMyQueueSes(eventQueue, ses, subject);
+                    sessThread.setMyQueueSes(eventQueue, ses, username);
                     Future<?> future = vexec.submit(sessThread);
                  /*   doesn't work
                     future.thenAccept(result -> {
