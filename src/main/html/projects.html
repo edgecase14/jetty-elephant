@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang=en>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <script type="module" src="projects.js" async></script>
+        <title>NRSI Projects</title>
+    </head>
+
+    <body>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+            <div><h1>MrProject</h1></div>
+            <div>Logged in user:<div id="username">empty</div></div>
+        </div>
+
+        <table rules='all' style='border: 1px solid #900' id="projects">
+            <!-- specifying width of col and colgroup is suppsed to speed rendering -->
+            <colgroup>
+                <col>
+                <col style="background-color: yellow">
+                <col>
+            </colgroup>
+            <!-- need to dynamically create, based on # days in pay period chosen -->
+            <thead><tr><th>Project #</th><th>Job Name</th><th>TS Active</th></tr></thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr id="day_totals"><th colspan=3>Day Total</th></tr>
+            </tfoot>
+        </table>
+        
+        <!-- prototype form for new RFP/Proposal/Project
+        -new or existing customer?  Implies customer lookup.
+        -new subcode or entirely new project? Implies project lookup.
+        -province
+        -point site location on map
+        -or just text description of site/address?
+        -list/search existing RFPs in progress - short list?
+        
+        const form = document.querySelector("#new_rfp");
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            sendData();
+        });
+        -->
+        <form id="new_rfp">
+              <ul>
+                  <li>
+                      <label for="name">RFP Name:</label>
+                      <input type="text" id="name" name="user_name" />
+                  </li>
+                  <li class="button">
+                      <button type="submit">Save new RFP</button>
+                  </li>
+              </ul>
+        </form>
+
+
+        <br>WebSocket status: <!--  websocket status area -->
+        <div id="tsc"></div>
+    </body>
+</html>
+

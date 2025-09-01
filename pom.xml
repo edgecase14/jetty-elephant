@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>net.coplanar.app</groupId>
+  <artifactId>elephant</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>elephant</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.target>21</maven.compiler.target>
+    <jettyVersion>12.0.9</jettyVersion>
+<!--6.5.2.Final-->
+    <hibernateVersion>6.5.2.Final</hibernateVersion>
+  </properties>
+
+<!--
+<repositories>
+    <repository>
+        <id>oss-sonatype</id>
+        <name>oss-sonatype</name>
+        <url>https://repo1.maven.org/maven2/</url>
+    </repository>
+</repositories>
+-->
+
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty.http2</groupId>
+        <artifactId>jetty-http2-server</artifactId>
+        <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty.http3</groupId>
+        <artifactId>jetty-http3-server</artifactId>
+        <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-alpn-server</artifactId>
+        <version>${jettyVersion}</version>
+    </dependency>
+    <!-- dynamically loaded -->
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-alpn-java-server</artifactId>
+        <version>${jettyVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-session</artifactId>
+        <version>${jettyVersion}</version>
+    </dependency>
+    <!-- Hibernate dependencies -->
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernateVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernateVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-agroal</artifactId>
+        <version>${hibernateVersion}</version>
+    </dependency>
+    <dependency>
+        <groupId>io.agroal</groupId>
+        <artifactId>agroal-pool</artifactId>
+        <version>2.2</version>
+    </dependency>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.3</version>
+    </dependency>
+    <!-- logging -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>2.1.0-alpha1</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.17.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geolatte</groupId>
+      <artifactId>geolatte-geojson</artifactId>
+      <version>1.9.1</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>8.0.1.Final</version>
+    </dependency>
+    <!-- junixsocket dependency -->
+    <dependency>
+        <groupId>com.kohlschutter.junixsocket</groupId>
+        <artifactId>junixsocket-common</artifactId>
+        <version>2.9.1</version>
+    </dependency>
+    <dependency>
+        <groupId>com.kohlschutter.junixsocket</groupId>
+        <artifactId>junixsocket-native-common</artifactId>
+        <version>2.9.1</version>
+    </dependency>
+    <dependency>
+        <groupId>com.kohlschutter.junixsocket</groupId>
+        <artifactId>junixsocket-native-custom</artifactId>
+        <version>2.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-kerberos-shared</artifactId>
+      <version>1.5.7</version>
+      <type>jar</type>
+    </dependency>
+<!--
+    <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.78.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.kerby</groupId>
+        <artifactId>kerb-client</artifactId>
+        <version>2.0.3</version>
+    </dependency>
+-->
+    <dependency>
+        <groupId>org.apache.kerby</groupId>
+        <artifactId>kerb-common</artifactId>
+        <version>2.0.3</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.kerby</groupId>
+        <artifactId>kerby-asn1</artifactId>
+        <version>2.0.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.kerb4j</groupId>
+        <artifactId>kerb4j-client</artifactId>
+        <version>0.2.0</version>
+    </dependency>
+    <dependency>
+        <groupId>com.github.jpmsilva.jsystemd</groupId>
+        <artifactId>jsystemd-core</artifactId>
+        <version>3.1.1</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.2.0</version>
+          <executions>
+            <execution><goals><goal>java</goal><goal>exec</goal></goals></execution>
+          </executions>
+          <configuration>
+            <mainClass>net.coplanar.app.SrvApp</mainClass>
+            <arguments>
+                <argument>-Djava.util.logging.config.file="logging.properties"</argument>
+                <!-- to find issues with Virtual Threads using synchronized() and native methods-->
+                <argument>-Djdk.tracePinnedThreads=full</argument>
+                <!--
+                <argument>-Djava.security.krb5.conf=/etc/krb5.conf</argument>
+                <argument>-Djava.security.auth.login.config=jaas.conf</argument>
+                useSubjectCredsOnly=false
+                -->
+            </arguments>
+            <systemProperties>
+                <systemProperty>
+                    <key>java.util.logging.config.file</key>
+                    <value>logging.properties</value>
+                </systemProperty>
+                <!-- to find issues with Virtual Threads using synchronized() and native methods-->
+                <systemProperty>
+                    <key>jdk.tracePinnedThreads</key>
+                    <value>full</value>
+                </systemProperty>
+                <!-- SSL/TLS debugging for LDAP connection issues -->
+		<!--
+                <systemProperty>
+                    <key>javax.net.debug</key>
+                    <value>ssl,handshake,record,plaintext</value>
+                </systemProperty>
+		-->
+                <!-- LDAP connection pool debugging -->
+                <systemProperty>
+                    <key>com.sun.jndi.ldap.connect.pool.debug</key>
+                    <value>fine</value>
+                </systemProperty>
+                <!-- was used for built-in kerberos auth
+                <systemProperty>
+                    <key>java.security.krb5.conf</key>
+                    <value>/etc/krb5.conf</value>
+                </systemProperty>
+                <systemProperty>
+                    <key>java.security.auth.login.config</key>
+                    <value>jaas.conf</value>
+                </systemProperty>
+                <systemProperty>
+                    <key>javax.security.auth.useSubjectCredsOnly</key>
+                    <value>false</value>
+                </systemProperty>
+                  -->
+            </systemProperties>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+          <configuration>
+            <compilerArgs>
+              <arg>--enable-preview</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+        <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.7.1</version>
+            <configuration>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <archive>
+                    <manifest>
+                        <mainClass>net.coplanar.app.SrvApp</mainClass>
+                    </manifest>
+                </archive>               
+            </configuration>
+            <executions>
+                <execution>
+                    <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                    <phase>package</phase> <!-- bind to the packaging phase -->
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

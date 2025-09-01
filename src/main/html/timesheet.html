@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang=en>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <!-- imports are for OpenLayers, so we don't need node.js NPM -->
+    <script type="importmap">
+     {
+       "imports": {
+         "ol/": "./ol/",
+         "rbush": "./rbush/index.js",
+         "quickselect": "./quickselect/index.js",
+         "color-space/": "./color-space/",
+         "color-rgba": "./color-rgba/index.js",
+         "color-parse": "./color-parse/index.js",
+         "color-name": "./color-name/index.js",
+         "proj4/": "./proj4js/"
+       }
+     }
+    </script> 
+    <link rel="stylesheet" href="ol/ol.css">
+    <script src='./proj4js-2.11.0/dist/proj4.js'></script>
+    <script type="module" src="main.js" async></script>
+    <title>NRSI Timesheet</title>
+    <style type = text/css>
+      .is-stat { background-color: #e0ffff; }
+      .map {
+        width: 100%;
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+      <div class="title-container" style="display: grid; grid-template-columns: repeat(5, 1fr);">
+          <div><h1>MrTimesheet</h1>Pay Period: <div id="pay_period">unknown</div></div>
+          <div>Timesheet for user:<div id="username">empty</div></div>
+          
+          <select id="names" name="names">
+              <option value="jjackson@nrsi.on.ca">jjackson@nrsi.on.ca</option>
+              <option value="mdocken@nrsi.on.ca">mdocken@nrsi.on.ca</option>
+              <option value="jbannon@nrsi.on.ca">jbannon@nrsi.on.ca</option>
+              <option value="INVALID">invalid-user-email</option>
+          </select>
+
+          <div>My Supervisor is:<div id="supervisor">empty</div></div>
+          <div><div id="approve">not requested</div><button id="app_req">Request Approval</button></div>
+      </div>
+
+	<table rules='all' style='border: 1px solid #900' id="mrtimesheet">
+          <!-- specifying width of col and colgroup is suppsed to speed rendering -->
+	  <colgroup>
+	    <col>
+	    <col style="background-color: yellow">
+	  </colgroup>
+	  <!-- need to dynamically create, based on # days in pay period chosen -->
+	  <thead><tr id="days"><th>Project #</th><th>Job Name</th></tr></thead>
+	  <tbody></tbody>
+	  <tfoot>
+	    <tr id="add"><th>search</th><th>search</th><th colspan=16>Add Project</th></tr>
+	    <tr id="day_totals"><th colspan=2>Day Total</th></tr>
+	  </tfoot>
+	</table>
+
+    <div class="home-container" style="display: grid; grid-template-columns: repeat(5, 1fr);">
+      <div class="staus">
+	<table rules='all' style='border: 1px solid #900' id="calcs">
+		<thead><tr><th>Totals</th></tr></thead>
+		<tbody>
+			<tr><td>Non-Billable</td><td>TBD</td>
+			<tr><td>Billable</td><td>TBD</td>
+			<tr><td>Percent Billable</td><td>TBD</td>
+			<tr><td>Grand Total (not incl banked)</td><td id="total">TBD</td>
+			<tr><td>REDEEM BANKED</td><td contenteditable='true'></td>
+			<tr><td>Grand Total (incl banked)</td><td>TBD</td>
+		</tbody>
+	</table>
+      </div>
+
+      <div class="staus">
+	<table rules='all' style='border: 1px solid #900' id="vac">
+		<thead><tr><th>Vacation</th></tr></thead>
+		<tbody>
+			<tr><td>Accrued start of year</td><td>TBD</td>
+			<tr><td>Accrued this period</td><td>TBD</td>
+			<tr><td>vac used this period</td><td>TBD</td>
+			<tr><td>sick time this period</td><td>TBD</td>
+			<tr><td>Total</td><td>TBD</td>
+		</tbody>
+	</table>
+      </div>
+
+	<table rules='all' style='border: 1px solid #900' id="stat">
+		<thead><tr><th>Stat pay</th></tr></thead>
+		<tbody>
+			<tr><td>day(s) of month</td><td>TBD</td>
+			<tr><td>4-week total</td><td>TBD</td>
+			<tr><td>hours paid this period</td><td>TBD</td>
+		</tbody>
+	</table>
+
+	<table rules='all' style='border: 1px solid #900' id="banked">
+		<thead><tr><th>Banked hours</th></tr></thead>
+		<tbody>
+			<tr><td>previous</td><td>TBD</td>
+			<tr><td>OT banked this period</td><td>TBD</td>
+			<tr><td>hours paid out this period</td><td>TBD</td>
+			<tr><td>hours remaining</td><td>TBD</td>
+		</tbody>
+	</table>
+
+	<table rules='all' style='border: 1px solid #900' id="otinv">
+		<thead><tr><th>Overtime invoicing</th></tr></thead>
+		<tbody>
+			<tr><td>OT this period</td><td>TBD</td>
+			<tr><td>OT assigned to projects</td><td>TBD</td>
+			<tr><td>hours remaining to assign</td><td>TBD</td>
+		</tbody>
+	</table>
+	
+    </div>
+
+    <br>WebSocket status: <!--  websocket status area -->
+    <div id="tsc"></div>
+    <proj-map id ="map" class='map'></proj-map>
+  </body>
+</html>
+
