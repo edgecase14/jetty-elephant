@@ -93,7 +93,7 @@ public class KerberosHandler extends Handler.Wrapper {
 //        X509Certificate[] certs = (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
         if (certs != null && certs.length > 0) {
             // TLS authentication succeeded, skip Kerberos authentication
-            var certuser = certs[0].getSubjectDN().getName();
+            var certuser = certs[0].getSubjectX500Principal().getName();
             // java.util.Collection<List<?>> certuser2 = certs[0].getSubjectAlternativeNames();
             // now pull out the msUPN or email address
             System.out.println("certuser: " + certuser);
@@ -206,7 +206,9 @@ public class KerberosHandler extends Handler.Wrapper {
             }
             
             // is this safe for Virtual Threads (avoids pinning)?
-            eventQueue = (BlockingQueue<UpdateMessage>) ses.getAttribute("eventQueue");
+            @SuppressWarnings("unchecked")
+            BlockingQueue<UpdateMessage> tempQueue = (BlockingQueue<UpdateMessage>) ses.getAttribute("eventQueue");
+            eventQueue = tempQueue;
             if (eventQueue == null) {
                 GenericThread sessThread = (GenericThread) appSessions.getThread(sid);
                 if (sessThread == null) {

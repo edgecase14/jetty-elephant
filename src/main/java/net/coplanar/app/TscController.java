@@ -182,12 +182,12 @@ public final class TscController extends GenericController {
                     //Transaction tx = hsession.beginTransaction();
                     System.out.println("LOADING: vu project query starting create2");
                     // SELECT * FROM project WHERE proj_id IN ( SELECT DISTINCT proj_id FROM tscell NATURAL JOIN project WHERE user_id = 1 )
-                    Query q = hsession.createQuery("FROM Project p WHERE p.proj_id IN (SELECT DISTINCT t.project.proj_id FROM TsCell t WHERE t.tsuser.user_id = :userId AND t.pay_period = '2024-06-P1')", Project.class);
+                    Query<Project> q = hsession.createQuery("FROM Project p WHERE p.proj_id IN (SELECT DISTINCT t.project.proj_id FROM TsCell t WHERE t.tsuser.user_id = :userId AND t.pay_period = '2024-06-P1')", Project.class);
                     System.out.println("LOADING: vu project query created");
 
                     q.setParameter("userId", vu.getUser_id());
                     System.out.println("LOADING: vu project query parameter set");
-                    List<Project> pl = q.list();
+                    List<Project> pl = q.getResultList();
                     System.out.println("LOADING: vu project query done");
                     for (Project pj : pl) {
                         GotRow gr = new GotRow();
@@ -207,10 +207,10 @@ public final class TscController extends GenericController {
                             addResponseObj(pa);
                         }
 
-                        Query tscs = hsession.createQuery("FROM TsCell t WHERE t.project.proj_id = :projId AND t.tsuser.user_id = :userId AND t.pay_period = '2024-06-P1'", TsCell.class);
+                        Query<TsCell> tscs = hsession.createQuery("FROM TsCell t WHERE t.project.proj_id = :projId AND t.tsuser.user_id = :userId AND t.pay_period = '2024-06-P1'", TsCell.class);
                         tscs.setParameter("projId", pj.getProj_id());
                         tscs.setParameter("userId", vu.getUser_id());
-                        List<TsCell> tsc = tscs.list();
+                        List<TsCell> tsc = tscs.getResultList();
                         for (TsCell tc : tsc) {
                             // send project cells
                             // delegate this to a TsCell class

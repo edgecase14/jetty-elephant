@@ -267,7 +267,7 @@ public class SrvApp
 
         System.out.println("postgres server version check...");
         try (org.hibernate.Session hsession = sf.openSession()) {
-            List result = hsession.createNativeQuery("SELECT version()").getResultList();
+            List<Object> result = hsession.createNativeQuery("SELECT version()", Object.class).getResultList();
 
             // Print the result
             System.out.println("Postgresql server version: " + result);

@@ -33,10 +33,12 @@ public class Tsc2 extends Handler.Abstract.NonBlocking {
         //response.getHeaders().put(HttpHeader.CONTENT_TYPE, "text/html; charset=UTF-8");
         Session ses = request.getSession(false);
         String un = "none";
-        BlockingQueue<Object> eventQueue = null;
+        BlockingQueue<UpdateMessage> eventQueue = null;
         if (ses != null) {
             un = ses.getId();         
-            eventQueue = (BlockingQueue<Object>) ses.getAttribute("eventQueue");
+            @SuppressWarnings("unchecked")
+            BlockingQueue<UpdateMessage> tempQueue = (BlockingQueue<UpdateMessage>) ses.getAttribute("eventQueue");
+            eventQueue = tempQueue;
         } else {
             System.out.println("Tsc2 no session");
         }
@@ -56,7 +58,7 @@ public class Tsc2 extends Handler.Abstract.NonBlocking {
         return true;
     }
     
-    public Consumer<String> toEventQueue(BlockingQueue<Object> eventQueue) {
+    public Consumer<String> toEventQueue(BlockingQueue<UpdateMessage> eventQueue) {
         
         return (String result) -> {
             try {
