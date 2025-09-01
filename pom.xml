@@ -289,7 +289,9 @@
           <version>3.8.0</version>
           <configuration>
             <compilerArgs>
-              <arg>--enable-preview</arg>
+              <arg>-Xlint:deprecation</arg>
+              <arg>-Xlint:removal</arg>
+              <arg>-Xlint:unchecked</arg>
             </compilerArgs>
           </configuration>
         </plugin>
