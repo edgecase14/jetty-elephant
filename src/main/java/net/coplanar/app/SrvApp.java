@@ -11,13 +11,15 @@ import static java.lang.Boolean.TRUE;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.ssl.KeyStoreScanner;
 
 import org.eclipse.jetty.alpn.server.ALPNServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
 import org.eclipse.jetty.http3.server.HTTP3ServerConnectionFactory;
-import org.eclipse.jetty.quic.server.ServerQuicConfiguration;
-import org.eclipse.jetty.quic.server.QuicServerConnector;
+import org.eclipse.jetty.quic.quiche.server.QuicheServerConnector;
+import org.eclipse.jetty.quic.quiche.server.QuicheServerQuicConfiguration;
+
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
@@ -126,6 +128,7 @@ public class SrvApp
             //systemd.notifyStopping();  // Notify systemd that the application is stopping
         //} else {
         //    System.out.println("Systemd is not active. Running application without systemd management.");
+	//    we should use setproctitle() here instead
             //runApplicationLogic();
         //}
         
@@ -543,9 +546,9 @@ public class SrvApp
         System.out.println("SNI REQ: " + sslContextFactory.isSniRequired());
 
 	// watch & hot-reload the keystore:
-	//KeyStoreScanner scanner = new KeyStoreScanner(ssl);
-	//scanner.setScanInterval(Duration.ofMinutes(1));
-	//server.addBean(scanner);
+	KeyStoreScanner scanner = new KeyStoreScanner(sslContextFactory);
+	scanner.setScanInterval(60); // seconds
+	server.addBean(scanner);
 
         
         //server.setHandler(new SrvApp());
@@ -580,8 +583,11 @@ public class SrvApp
         
         // Third, create the connector for HTTP/3.
         Path pemWorkDir = Path.of("tls");
-        ServerQuicConfiguration serverQuicConfig = new ServerQuicConfiguration(sslContextFactory, pemWorkDir);
-        QuicServerConnector http3Connector = new QuicServerConnector(server, serverQuicConfig, new HTTP3ServerConnectionFactory(serverQuicConfig));
+        //ServerQuicheConfiguration serverQuicConfig = new ServerQuicheConfiguration(sslContextFactory, pemWorkDir);
+        //QuicServerConnector http3Connector = new QuicServerConnector(server, serverQuicConfig, new HTTP3ServerConnectionFactory(serverQuicConfig));
+	QuicheServerQuicConfiguration serverQuicConfig = new QuicheServerQuicConfiguration(pemWorkDir);
+	QuicheServerConnector http3Connector = new QuicheServerConnector(server, sslContextFactory, serverQuicConfig, new HTTP3ServerConnectionFactory());
+
         http3Connector.setPort(443);
         server.addConnector(http3Connector);
         
