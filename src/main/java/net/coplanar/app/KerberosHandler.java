@@ -123,7 +123,82 @@ public class KerberosHandler extends Handler.Wrapper {
             String kerberosToken = authHeader.substring("Negotiate ".length());
             byte[] token = Base64.getDecoder().decode(kerberosToken);
             
- 
+            // Validate kvno before proceeding - check that we have compatible keytab entries
+	    // we shouldn't have to do this!
+	    //
+	    // https://github.com/openjdk/jdk/blob/master/src/java.security.jgss/share/classes/sun/security/krb5/EncryptionKey.java
+	    // comment around line 546: "When no matched kvno is found, returns tke key of the same etype with the highest kvno"
+	    // that seems wrong.  there are GSSException types made to report the error, rather than blindly trying decryption
+	    //
+	    // RFC 4120 says that when a server receives an AP-REQ, “If the key version indicated by the Ticket in the KRB_AP_REQ is not one the server can use (e.g., it indicates an old key, and the server no longer possesses a copy of the old key), the KRB_AP_ERR_BADKEYVER error is returned.”
+	    // IETF Datatracker
+
+	    // Related: if the server simply doesn’t have the right key material to decrypt the ticket (e.g., wrong realm key), it should return KRB_AP_ERR_NOKEY.
+	    // IETF Datatracker
+
+	    // For reference, the error-code values are:
+
+            //    KRB_AP_ERR_BADKEYVER = 44 (“Specified version of key is not available”)
+	    //
+	    //    Claude's analysis notes are in ../jdk/src/java.security.jgss/TEST_COVERAGE_claude.txt
+
+            try {
+                String keytabPath = SrvApp.srvProp.getProperty("keytab");
+                var keytabEntries = KerberosKeytabReader.readKeytabFile(keytabPath);
+                System.out.println("Available keytab key versions: " +
+                    keytabEntries.stream().map(e -> e.getKeyVersion()).distinct().toList());
+
+                // Validate kvno using keytab entries from srv_cred
+                if (SrvApp.srv_cred != null && !SrvApp.srv_cred.isEmpty()) {
+                    var availableKvnos = SrvApp.srv_cred.stream().map(e -> e.getKeyVersion()).distinct().toList();
+
+                    // Extract kvno from SPNEGO token using byte pattern matching
+                    try {
+                        boolean kvnoFound = false;
+                        int foundClientKvno = -1;
+
+                        // Debug: print full token in hex
+                        StringBuilder hexDump = new StringBuilder();
+                        for (int i = 0; i < token.length; i++) {
+                            hexDump.append(String.format("%02X ", token[i] & 0xFF));
+                        }
+                        System.out.println("Token hex dump (full): " + hexDump.toString());
+
+                        // Look for kvno pattern: A1 03 02 01 [kvno]
+                        for (int i = 0; i < token.length - 4; i++) {
+                            if (token[i] == (byte)0xA1 && token[i+1] == (byte)0x03 &&
+                                token[i+2] == (byte)0x02 && token[i+3] == (byte)0x01) {
+                                foundClientKvno = token[i+4] & 0xFF;
+                                System.out.println("Found client ticket kvno: " + foundClientKvno + " at offset " + i);
+
+                                if (availableKvnos.contains(foundClientKvno)) {
+                                    System.out.println("Kvno validation passed - client kvno " + foundClientKvno + " matches keytab");
+                                    kvnoFound = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!kvnoFound) {
+                            if (foundClientKvno == -1) {
+                                System.out.println("Kvno validation failed - no kvno found in token, keytab versions: " + availableKvnos);
+                            } else {
+                                System.out.println("Kvno mismatch - client kvno " + foundClientKvno + " not in keytab versions: " + availableKvnos);
+                            }
+                            response.setStatus(401);
+                            Content.Sink.write(response, true, "Service key version mismatch", callback);
+                            return true;
+                        }
+
+                    } catch (Exception e) {
+                        System.out.println("Error extracting kvno from token: " + e.getMessage());
+                        // Continue anyway - let GSS context establishment handle the validation
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("Unable to read keytab for validation: " + e.getMessage());
+            }
 
             try {
                 // even newer using kerb4j

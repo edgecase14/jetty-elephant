@@ -74,10 +74,11 @@ public class SrvApp
 {
     public static SessionFactory sf;
     public static Hashtable<String, String> ldap_env;
-    public static GSSCredential srv_cred;
+    public static List<KeytabEntry> srv_cred;
     public static SpnegoClient sp_client;
     public static Server server;
     public static AppSessions as;
+    public static Properties srvProp;
     
 
     //private static final ShutdownObject shutdownObject = new ShutdownObject();
@@ -133,7 +134,8 @@ public class SrvApp
         //}
         
         // GET CONFIG FILE SETTINGS
-        Properties srvProp = new Properties();
+	// temporarily made public for kvno testing
+        srvProp = new Properties();
         InputStream input = null;
 
         String keytabFilePath = null;
@@ -195,7 +197,7 @@ public class SrvApp
         SpnegoClient spnegoClient = SpnegoClient.loginWithKeyTab("HTTP/mjolnir.ad.coplanar.net", keytabFilePath, true);
         sp_client = spnegoClient;
         
-        srv_cred = getCredentialFromKeytab(keytabFilePath);
+        srv_cred = readKeytabFile(keytabFilePath);
 /*
         for (KeytabEntry entry : keytabEntries) {
             System.out.println(entry.getPrincipalName());
