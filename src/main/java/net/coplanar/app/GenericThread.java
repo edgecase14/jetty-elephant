@@ -33,7 +33,7 @@ import org.eclipse.jetty.util.Callback;
 public class GenericThread implements Runnable {
 
     private BlockingQueue<UpdateMessage> myQueue;
-    private Session ses;
+    private CustomSession customSession;
     List<UpdateMessage> ul;
     org.hibernate.Session hsession;
     private Response resp;
@@ -46,10 +46,11 @@ public class GenericThread implements Runnable {
     //    this.myQueue = myq;
     //    this.ses = ses;
     //}
-    final public void setMyQueueSes(BlockingQueue<UpdateMessage> myq, Session ses, String user) {
+    final public void setMyQueueSes(BlockingQueue<UpdateMessage> myq, CustomSession customSes, String user) {
         this.myQueue = myq;
-        this.ses = ses;
+        this.customSession = customSes;
         this.username = user;
+	System.out.println("setMyQueueSesusername: " + user);
     }
 
     final void addResponseObj(UpdateMessage msg) {
@@ -190,7 +191,7 @@ public class GenericThread implements Runnable {
                         continue;
                     
                     // races with EventSource reconnects
-                    resp = (Response) ses.getAttribute("sse");
+                    resp = customSession.getSseResponse();
                     if (resp == null) {
                         System.out.println("error: null sse - refresh browser");
                         // FIXME totally bail, browser state now stalled
@@ -215,7 +216,7 @@ public class GenericThread implements Runnable {
         } catch (Exception e) {
             System.out.println(e);
         } finally {
-            SrvApp.as.removeThread(ses.getId());
+            // Session cleanup now handled by CustomSessionHandler
         }
     }
 }

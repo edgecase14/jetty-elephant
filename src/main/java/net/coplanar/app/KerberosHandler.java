@@ -45,7 +45,7 @@ import org.eclipse.jetty.io.EndPoint.SslSessionData;
 
 public class KerberosHandler extends Handler.Wrapper {
     
-    private AppSessions appSessions;
+    private CustomSessionHandler sessionHandler;
     private final ExecutorService vexec;
 
     public KerberosHandler(boolean dynamic, Handler handler) {
@@ -64,15 +64,16 @@ public class KerberosHandler extends Handler.Wrapper {
         this(false, handler);
     }
     
-    public void setAppSession(AppSessions as) {
-        appSessions = as;
+    public void setSessionHandler(CustomSessionHandler sh) {
+        sessionHandler = sh;
     }
 
     @Override
     public boolean handle(Request request, Response response, Callback callback)
             throws Exception {
 
-        if (request.getSession(false) != null) {
+        CustomSession existingSession = sessionHandler.getSession(request, false);
+        if (existingSession != null) {
             // lets hope this is secure
             return super.handle(request, response, callback);
         }
@@ -99,8 +100,8 @@ public class KerberosHandler extends Handler.Wrapper {
             // TODO - mapping function?
             username = certuser;
             request.setAttribute("user", certuser);
-            var ses_for_cert = request.getSession(true);
-            ses_for_cert.setAttribute("username", username);
+            var customSession = sessionHandler.createSession(request, response);
+            customSession.setUsername(username);
             // how about create a new Subject(), and add a Principal?
             // LDAP login module can be run on vthread, let ldap client block all it wants
             authSucceeded = true;
@@ -255,7 +256,7 @@ public class KerberosHandler extends Handler.Wrapper {
 
                 GSSName srcName = gssContext.getSrcName();
                 String user = srcName.toString();
-                //System.out.println("user: " + user);
+                System.out.println("krb auth user: " + user);
                 // TODO - mapping function?
                 username = user.split("@")[0] + "@nrsi.on.ca";
                 // see above cert auth for notes about creating Subject etc.
@@ -277,57 +278,29 @@ public class KerberosHandler extends Handler.Wrapper {
         }
         
         if (authSucceeded && username != null) {
-            //return super.handle(request, response, callback);
-            // alternatively
-            var ses = request.getSession(true);
-            ses.setAttribute("username", username);
-            // ThreadSessionLifecycleListener logic here, now with access to Subject earlier
+            // Create new session for authenticated user
+            var customSession = sessionHandler.createSession(request, response);
+            customSession.setUsername(username);
             
-            String sid = ses.getId();
+            String sid = customSession.getId();
             System.out.println("Session created: " + sid);
-            // Add custom session creation logic here
 
-            BlockingQueue<UpdateMessage> eventQueue;
-
-            for (String name : ses.asAttributeMap().keySet()) {
-                System.out.println("Session: " + name);
-            }
-            Set<String> attributeNames = ses.getAttributeNameSet();
-            for (String attributeName : attributeNames) {
-                System.out.println("Attribute Name: " + attributeName + ", Value: " + ses.getAttribute(attributeName));
-            }
+            BlockingQueue<UpdateMessage> eventQueue = customSession.getQueue();
+            GenericThread sessThread = customSession.getThread();
             
-            // is this safe for Virtual Threads (avoids pinning)?
-            @SuppressWarnings("unchecked")
-            BlockingQueue<UpdateMessage> tempQueue = (BlockingQueue<UpdateMessage>) ses.getAttribute("eventQueue");
-            eventQueue = tempQueue;
             if (eventQueue == null) {
-                GenericThread sessThread = (GenericThread) appSessions.getThread(sid);
-                if (sessThread == null) {
-                    eventQueue = new LinkedBlockingQueue<>();
-                    // class should be based on the URL path - /ctlr/tsc2 = TscThread
-                    // generate this mapping using an Annotation?
-
-                    // chicken vs egg: can't set on Session until after this
-                    // String threadType = (String) ses.getAttribute("threadType");
-                    sessThread = new GenericThread();
-                    
-                    sessThread.setMyQueueSes(eventQueue, ses, username);
-                    Future<?> future = vexec.submit(sessThread);
-                 /*   doesn't work
-                    future.thenAccept(result -> {
-                        System.out.println("Task result: " + result);
-                        
-                    });
-*/
-                    appSessions.putThread(sid, sessThread);
-                } else {
-                    System.out.println("new session error: found thread and no eventQueue!");
-                }
-          //      ses.setAttribute("eventQueue", eventQueue);
-
+                System.out.println("new session error: no eventQueue in CustomSession!");
+            } else if (sessThread == null) {
+                // Create new thread since queue exists but no thread
+                sessThread = new GenericThread();
+                
+                sessThread.setMyQueueSes(eventQueue, customSession, username);
+                Future<?> future = vexec.submit(sessThread);
+                
+                customSession.setThread(sessThread);
+                customSession.setThreadFuture(future);
             } else {
-                System.out.println("new session error: found existing eventQueue!");
+                System.out.println("new session error: found existing thread!");
             }
 
         }

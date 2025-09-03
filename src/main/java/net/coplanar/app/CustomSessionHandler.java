@@ -28,8 +28,8 @@ public class CustomSessionHandler extends Handler.Wrapper {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
-        // Get or create session
-        CustomSession session = getSession(request, response);
+        // Get existing session only (don't create)
+        CustomSession session = getSession(request, false);
         if (session != null) {
             session.updateLastAccessTime();
             request.setAttribute("customSession", session);
@@ -38,7 +38,15 @@ public class CustomSessionHandler extends Handler.Wrapper {
         return super.handle(request, response, callback);
     }
 
-    private CustomSession getSession(Request request, Response response) {
+    public CustomSession getSession(Request request, boolean create) {
+        return getSession(request, null, create);
+    }
+
+    public CustomSession createSession(Request request, Response response) {
+        return getSession(request, response, true);
+    }
+
+    private CustomSession getSession(Request request, Response response, boolean create) {
         // Look for existing session ID in cookies
         String sessionId = null;
         var cookies = Request.getCookies(request);
@@ -61,21 +69,23 @@ public class CustomSessionHandler extends Handler.Wrapper {
             }
         }
 
-        // Create new session if none found or expired
-        if (session == null) {
+        // Create new session if none found or expired and create=true
+        if (session == null && create) {
             sessionId = generateSessionId();
             session = new CustomSession(sessionId);
             sessions.put(sessionId, session);
             
-            // Set session cookie
-            HttpCookie sessionCookie = HttpCookie.build(cookieName, sessionId)
-                    .path("/")
-                    .httpOnly(true)
-                    .secure(true)
-                    .sameSite(HttpCookie.SameSite.STRICT)
-                    .build();
-            
-            Response.addCookie(response, sessionCookie);
+            // Set session cookie if response provided
+            if (response != null) {
+                HttpCookie sessionCookie = HttpCookie.build(cookieName, sessionId)
+                        .path("/")
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite(HttpCookie.SameSite.STRICT)
+                        .build();
+                
+                Response.addCookie(response, sessionCookie);
+            }
         }
 
         return session;
@@ -90,22 +100,13 @@ public class CustomSessionHandler extends Handler.Wrapper {
     }
 
     public void removeSession(String sessionId) {
-        CustomSession session = sessions.remove(sessionId);
-        if (session != null && session.getThread() != null) {
-            session.getThread().interrupt();
-        }
+        sessions.remove(sessionId);
     }
 
     private void cleanupExpiredSessions() {
         sessions.entrySet().removeIf(entry -> {
             CustomSession session = entry.getValue();
-            if (session.isExpired(maxInactiveInterval)) {
-                if (session.getThread() != null) {
-                    session.getThread().interrupt();
-                }
-                return true;
-            }
-            return false;
+            return session.isExpired(maxInactiveInterval);
         });
     }
 

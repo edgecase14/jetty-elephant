@@ -47,13 +47,13 @@ public class ThreadTypeHandler extends Handler.Wrapper {
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
     
         // if session exists, pass to next handler, if not, create one to fire a user lookup async to hide latency
-        Session ses = request.getSession(false); // F1
+        CustomSession customSes = (CustomSession) request.getAttribute("customSession");
         // TODO - filter to only handle URL path /ctlr/
-        if (ses != null) {
-            String sid = ses.getId();
+        if (customSes != null) {
+            String sid = customSes.getId();
             //String user = (String) request.getAttribute("user");
             System.out.println("\nrequest session id: " + sid );  //+ " user: " + user);
-            var st = appSessions.getThread(sid);
+            var st = customSes.getThread();
             if (st == null) {
                 System.out.println("no thread for session!");
             }
@@ -76,7 +76,7 @@ public class ThreadTypeHandler extends Handler.Wrapper {
                 Class<?> ctl_class = TscController.class;
                 
                 //var eq = (BlockingQueue<UpdateMessage>) ses.getAttribute("initialQueue");
-                GenericThread gt = SrvApp.as.getThread(sid);
+                GenericThread gt = customSes.getThread();
                 BlockingQueue<UpdateMessage> eq = gt.getQueue();
                 GenericController ctlr = gt.getController();
                 if (ctlr == null) {

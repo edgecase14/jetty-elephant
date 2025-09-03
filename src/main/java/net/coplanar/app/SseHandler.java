@@ -54,18 +54,18 @@ public final class SseHandler extends Handler.Abstract.NonBlocking {
         
         response.setStatus(200);
         response.getHeaders().put(HttpHeader.CONTENT_TYPE, "text/event-stream; charset=UTF-8");
-        Session ses = request.getSession(false);
+        CustomSession customSes = (CustomSession) request.getAttribute("customSession");
         String sid = "none";
-        if (ses != null) {
+        if (customSes != null) {
             // close previous EventListener
-            Response sse = (Response) ses.getAttribute("sse");
+            Response sse = customSes.getSseResponse();
             if (sse != null) {
-                var cb = callbacks.get(response);
+                var cb = callbacks.get(sse);
                 Content.Sink.write(sse, true, "", cb);
             }
 
-            sid = ses.getId();
-            ses.setAttribute("sse", response);
+            sid = customSes.getId();
+            customSes.setSseResponse(response);
             // need to store callback somewhere so we can close the request later.
             callbacks.put(response, callback);
             //System.out.println("SseHandler WITH session");

@@ -1,8 +1,10 @@
 package net.coplanar.app;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import net.coplanar.updatemsg.UpdateMessage;
+import org.eclipse.jetty.server.Response;
 
 public class CustomSession {
     private final String sessionId;
@@ -12,6 +14,8 @@ public class CustomSession {
     private volatile long lastAccessTime;
     private String username;
     private String userId;
+    private Response sseResponse;
+    private Future<?> threadFuture;
 
     public CustomSession(String sessionId) {
         this.sessionId = sessionId;
@@ -52,6 +56,14 @@ public class CustomSession {
         this.userId = userId;
     }
 
+    public Response getSseResponse() {
+        return sseResponse;
+    }
+
+    public void setSseResponse(Response sseResponse) {
+        this.sseResponse = sseResponse;
+    }
+
     public long getCreationTime() {
         return creationTime;
     }
@@ -67,5 +79,13 @@ public class CustomSession {
     public boolean isExpired(long maxInactiveInterval) {
         return maxInactiveInterval > 0 && 
                (System.currentTimeMillis() - lastAccessTime) > (maxInactiveInterval * 1000);
+    }
+
+    public Future<?> getThreadFuture() {
+        return threadFuture;
+    }
+
+    public void setThreadFuture(Future<?> threadFuture) {
+        this.threadFuture = threadFuture;
     }
 }

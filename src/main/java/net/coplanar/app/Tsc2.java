@@ -31,14 +31,12 @@ public class Tsc2 extends Handler.Abstract.NonBlocking {
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
         response.setStatus(200);
         //response.getHeaders().put(HttpHeader.CONTENT_TYPE, "text/html; charset=UTF-8");
-        Session ses = request.getSession(false);
+        CustomSession customSes = (CustomSession) request.getAttribute("customSession");
         String un = "none";
         BlockingQueue<UpdateMessage> eventQueue = null;
-        if (ses != null) {
-            un = ses.getId();         
-            @SuppressWarnings("unchecked")
-            BlockingQueue<UpdateMessage> tempQueue = (BlockingQueue<UpdateMessage>) ses.getAttribute("eventQueue");
-            eventQueue = tempQueue;
+        if (customSes != null) {
+            un = customSes.getId();         
+            eventQueue = customSes.getQueue();
         } else {
             System.out.println("Tsc2 no session");
         }

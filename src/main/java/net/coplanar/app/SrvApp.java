@@ -58,7 +58,6 @@ import org.hibernate.cfg.Configuration;
 import net.coplanar.ents.*;
 import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.session.SessionHandler;
 import org.hibernate.HibernateException;
 
 import org.hibernate.cfg.AvailableSettings;
@@ -631,14 +630,12 @@ public class SrvApp
         sthread.setAppSession(as);
 
         var kh = new KerberosHandler(sthread);
-        // configure kh to use it
-        kh.setAppSession(as);
         
-        // Create and link the SessionHandler.
-        SessionHandler sessionHandler = new SessionHandler();
-        sessionHandler.setHandler(kh);
-        //sessionHandler.setHandler(contexts);
-        sessionHandler.setSessionPath("/");
+        // Create and link the CustomSessionHandler.
+        CustomSessionHandler sessionHandler = new CustomSessionHandler(kh);
+        
+        // configure kh to use it
+        kh.setSessionHandler(sessionHandler);
  
         // F1
         //var threadListener = new ThreadSessionLifecycleListener();

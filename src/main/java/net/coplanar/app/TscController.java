@@ -38,12 +38,14 @@ public final class TscController extends GenericController {
         if (vu == null) {
             if (view_user == null) {
                 view_user = parent_thread.username;
+		System.out.println("init() username: " + view_user);
             }
             vu = hsession.bySimpleNaturalId(TsUser.class).load(view_user);
             if (vu == null) {
                 System.out.println("TscController init() view_user lookup error: " + view_user);
-                }
-            System.out.println("TscController view_user: " + vu.getEmail());
+            } else {
+                System.out.println("TscController view_user: " + vu.getEmail());
+            }
        }
     }
     
