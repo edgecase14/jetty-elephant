@@ -93,7 +93,7 @@ export class ProjectMap extends BaseElement {
         //addFeature(-0.12755, 51.50722); // London
         //addFeature(2.3522, 48.8566); // Paris
         //addFeature(-79.3832, 43.6532); // Toronto
-        addFeature17N(630380.229 , 4834628.614, this.constructor.vectorSource ); // Toronto
+        //addFeature17N(630380.229 , 4834628.614, this.constructor.vectorSource ); // Toronto
         //
         // Create a vector layer
         const vectorLayer = new VectorLayer({
@@ -144,14 +144,14 @@ export class ProjectMap extends BaseElement {
             };
             
             const pa = new PointAdd();
-            pa.proj_id = 38731;  // testing only haha
+            pa.proj_id = 38730;  // testing only haha
             pa.point = geolattePoint;
             console.log('Point added:', JSON.stringify(coordinates));
             ProjectMap.sock.send(pa);
 
         });
         
-        addFeature17N(538924.960, 4821168.712, this.constructor.vectorSource); // Conestogo
+        //addFeature17N(538924.960, 4821168.712, this.constructor.vectorSource); // Conestogo
         //this.map.addLayer(vectorLayer);
         
    }
