@@ -24,7 +24,6 @@ import org.eclipse.jetty.util.UrlEncoded;
  */
 public class ThreadTypeHandler extends Handler.Wrapper {
 
-    private AppSessions appSessions;
 
     // TODO - no-arg constructor required? Jetty bug maybe, there's a no-arg constructor one of the superclasses that doesn't make sense
     
@@ -35,10 +34,6 @@ public class ThreadTypeHandler extends Handler.Wrapper {
     
     public ThreadTypeHandler(Handler handler) {
         this(false, handler);
-    }
-    
-    public void setAppSession(AppSessions as) {
-        appSessions = as;
     }
 
     // comes after Session created, and Listener has started GenericThread - we pass it a GenericController to use thru it's eventQueue

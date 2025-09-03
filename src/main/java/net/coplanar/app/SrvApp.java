@@ -76,7 +76,6 @@ public class SrvApp
     public static List<KeytabEntry> srv_cred;
     public static SpnegoClient sp_client;
     public static Server server;
-    public static AppSessions as;
     public static Properties srvProp;
     
 
@@ -622,12 +621,9 @@ public class SrvApp
         contexts.addHandler(postit);
         contexts.addHandler(hwctx);
 
-        // create our custom AppSessions
-        as = new AppSessions();
         
         //Handler sthread = new SessionThreadHandler(contexts);
         var sthread = new ThreadTypeHandler(contexts);  // *after* session created
-        sthread.setAppSession(as);
 
         var kh = new KerberosHandler(sthread);
         

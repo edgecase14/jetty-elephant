@@ -7,6 +7,11 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.Callback;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +29,8 @@ public class CustomSessionHandler extends Handler.Wrapper {
         super(handler);
         // Start cleanup task every 5 minutes
         cleanupExecutor.scheduleAtFixedRate(this::cleanupExpiredSessions, 5, 5, TimeUnit.MINUTES);
+        // Write session list to file every 10 seconds
+        cleanupExecutor.scheduleAtFixedRate(this::writeSessionList, 10, 10, TimeUnit.SECONDS);
     }
 
     @Override
@@ -112,6 +119,33 @@ public class CustomSessionHandler extends Handler.Wrapper {
 
     public int getSessionCount() {
         return sessions.size();
+    }
+
+    private void writeSessionList() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("sessions.txt"))) {
+            writer.println("Session List - " + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            writer.println("Total sessions: " + sessions.size());
+            writer.println();
+            
+            for (var entry : sessions.entrySet()) {
+                CustomSession session = entry.getValue();
+                writer.printf("Session ID: %s%n", session.getId());
+                writer.printf("  Username: %s%n", session.getUsername());
+                writer.printf("  User ID: %s%n", session.getUserId());
+                writer.printf("  Thread: %s%n", session.getThread() != null ? "active" : "none");
+                writer.printf("  Creation: %s%n", 
+                    LocalDateTime.ofEpochSecond(session.getCreationTime() / 1000, 0, 
+                    java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.Instant.now()))
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                writer.printf("  Last Access: %s%n", 
+                    LocalDateTime.ofEpochSecond(session.getLastAccessTime() / 1000, 0, 
+                    java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.Instant.now()))
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                writer.println();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing session list: " + e.getMessage());
+        }
     }
 
     public void shutdown() {
