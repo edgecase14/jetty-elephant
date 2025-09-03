@@ -57,4 +57,4 @@ systemd unit file
 
 port# and hostname for HTTP service
 
-
+start url https://mjolnir.ad.coplanar.net/timesheet.html?user=jjackson%40nrsi.on.ca&pay_period=2024-06-P1
