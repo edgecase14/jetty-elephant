@@ -170,8 +170,21 @@ public class KerberosHandler extends Handler.Wrapper {
                                 token[i+2] == (byte)0x02 && token[i+3] == (byte)0x01) {
                                 foundClientKvno = token[i+4] & 0xFF;
                                 System.out.println("Found client ticket kvno: " + foundClientKvno + " at offset " + i);
+                                System.out.println("Available kvnos: " + availableKvnos + " (type: " + availableKvnos.getClass() + ")");
+                                System.out.println("Client kvno: " + foundClientKvno + " (type: " + Integer.class + ")");
+                                System.out.println("Contains check: " + availableKvnos.contains(foundClientKvno));
 
-                                if (availableKvnos.contains(foundClientKvno)) {
+                                // Try explicit comparison since contains() is failing
+                                boolean hasMatch = false;
+                                for (int kvno : availableKvnos) {
+                                    if (kvno == foundClientKvno) {
+                                        hasMatch = true;
+                                        break;
+                                    }
+                                }
+                                System.out.println("Explicit kvno match: " + hasMatch);
+
+                                if (hasMatch || availableKvnos.contains(foundClientKvno)) {
                                     System.out.println("Kvno validation passed - client kvno " + foundClientKvno + " matches keytab");
                                     kvnoFound = true;
                                     break;

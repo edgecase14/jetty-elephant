@@ -80,7 +80,7 @@ public class GenericThread implements Runnable {
             System.out.println("new GenericThread.");
 
             if (username == null) {
-                // problem
+                System.out.println("GenericThread username is NULL... query string missing ?user= ?");
             }
             Thread.currentThread().setName("GenericThread-" + username);
 

@@ -18,7 +18,10 @@ Demonstration of all of the following thrown together.  Shaken, not stirred.
 production configuration settings:
 
 jaas.conf: Kerberos keytab and service principal name
--get from Samba AD DC # samba-tool ext-keytab ....
+-get from Samba AD DC # samba-tool domain exportkeytab 
+-or domain member
+ # net ads enctypes list http-mjolnir
+ # samba-tool domain exportkeytab http-mjolnir.keytab --principal=HTTP/mjolnir.ad.coplanar.net
 -newer implementation gets SPN from keytab
 
 /etc/krb5.conf: maybe needed for Kerberos realm and KDC
