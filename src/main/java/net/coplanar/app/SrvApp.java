@@ -600,7 +600,7 @@ public class SrvApp
         // Create and configure a ResourceHandler.
         ResourceHandler handler = new ResourceHandler();
         // Configure the directory where static resources are located.
-        handler.setBaseResource(ResourceFactory.of(handler).newResource("src/main/html/"));
+        handler.setBaseResource(ResourceFactory.of(handler).newResource("target/classes/static/"));
         // Configure directory listing.
         handler.setDirAllowed(false);
         // Configure welcome files.
