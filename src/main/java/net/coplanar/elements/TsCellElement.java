@@ -7,7 +7,7 @@ package net.coplanar.elements;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.coplanar.app.GenericController;
+import net.coplanar.controller.GenericController;
 import net.coplanar.ents.TsCell;
 import net.coplanar.updatemsg.*;
 import org.hibernate.Session;

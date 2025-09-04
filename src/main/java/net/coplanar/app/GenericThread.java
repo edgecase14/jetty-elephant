@@ -24,6 +24,8 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import net.coplanar.updatemsg.SetController;
+import net.coplanar.controller.Timesheet;
+import net.coplanar.controller.GenericController;
 import org.eclipse.jetty.util.Callback;
 
 /**
@@ -38,7 +40,7 @@ public class GenericThread implements Runnable {
     org.hibernate.Session hsession;
     private Response resp;
     private List<Principal> userGroups = new ArrayList<>();
-    String username;
+    public String username;
     private GenericController ctlr = null;
 
     // would be nice if there was a way for subclasses to not have to include a constructor
@@ -53,11 +55,11 @@ public class GenericThread implements Runnable {
 	System.out.println("setMyQueueSesusername: " + user);
     }
 
-    final void addResponseObj(UpdateMessage msg) {
+    public final void addResponseObj(UpdateMessage msg) {
         this.ul.add(msg);
     }
 
-    final void writeObjList() throws JsonProcessingException {
+    public final void writeObjList() throws JsonProcessingException {
         // no callback is suspicious - what keeps multiple writes in sequence?  maybe use synchronous version?
         SseHandler.writeObjList(this.resp, this.ul, Callback.NOOP);
         // we still hold a reference to ul, so it (incorrectly) runs concurrently with SseHandler
@@ -204,7 +206,7 @@ public class GenericThread implements Runnable {
                     System.out.println("interrupt GenericThread.");
                     Thread.currentThread().interrupt();
                 } catch (JsonProcessingException ex) {
-                    Logger.getLogger(TscController.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Timesheet.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (Exception e) {
                     System.out.println(e);
                 }

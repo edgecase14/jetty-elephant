@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package net.coplanar.app;
+package net.coplanar.controller;
 
 // out damned spot!
 import com.fasterxml.jackson.core.JsonProcessingException;
+import net.coplanar.annotations.Controller;
 import java.util.List;
 import net.coplanar.ents.*;
 import net.coplanar.updatemsg.*;
@@ -17,13 +18,12 @@ import org.hibernate.query.Query;
  *
  * @author jjackson
  */
-public final class TscController extends GenericController {
+@Controller
+public final class Timesheet extends GenericController {
 
     private enum TState {
         LOADING,
-        EDITING,
-        SUBMITTED,
-        CLOSED
+        EDITING
     }
     private TState timesheet_state = TState.LOADING;
 //    private final AtomicInteger messageId = new AtomicInteger(0);
@@ -42,9 +42,9 @@ public final class TscController extends GenericController {
             }
             vu = hsession.bySimpleNaturalId(TsUser.class).load(view_user);
             if (vu == null) {
-                System.out.println("TscController init() view_user lookup error: " + view_user);
+                System.out.println("Timesheet init() view_user lookup error: " + view_user);
             } else {
-                System.out.println("TscController view_user: " + vu.getEmail());
+                System.out.println("Timesheet view_user: " + vu.getEmail());
             }
        }
     }
@@ -69,7 +69,8 @@ public final class TscController extends GenericController {
 
     }
 
-    public static UpdateMessage queryNavigated(MultiMap queryMap) {
+    @Override
+    public UpdateMessage queryNavigated(MultiMap<String> queryMap) {
 
         String url_pay_period;
         String url_user;
@@ -108,7 +109,7 @@ public final class TscController extends GenericController {
     }
 
     @Override
-    protected void controller(UpdateMessage event) throws JsonProcessingException {
+    public void controller(UpdateMessage event) throws JsonProcessingException {
         // can we also take another event type here, with optional URL query string,
         // to start prefetching?
         // query string vars: pay_period, view_user (so admin can edit other's)
@@ -135,9 +136,9 @@ public final class TscController extends GenericController {
             System.out.println("ShowUsername to controller: " + ev.username);
             if (!ev.username.equals(vu.getEmail())) {
                 var new_vu = hsession.bySimpleNaturalId(TsUser.class).load(ev.username);
-                System.out.println("TscController view_user lookup: " + vu.getEmail());
+                System.out.println("Timesheet view_user lookup: " + vu.getEmail());
                 if (new_vu == null) {
-                    System.out.println("TscController view_user lookup error");
+                    System.out.println("Timesheet view_user lookup error");
                 } else {
                     vu = new_vu;
                     view_user = ev.username;
@@ -293,10 +294,6 @@ public final class TscController extends GenericController {
                 // should throw msg on a queue, so it can be re-sent
                 // if browser EventSource reconnects, 
                 // and track msg# for idempotent retries
-            }
-            case SUBMITTED -> {
-            }
-            case CLOSED -> {
             }
             default ->
                 throw new AssertionError(timesheet_state.name());

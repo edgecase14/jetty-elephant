@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.coplanar.updatemsg.NewPeriod;
 import net.coplanar.updatemsg.SetController;
 import net.coplanar.updatemsg.UpdateMessage;
+import net.coplanar.controller.GenericController;
 import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.UrlEncoded;
 
@@ -47,7 +48,7 @@ public class ThreadTypeHandler extends Handler.Wrapper {
         if (customSes != null) {
             String sid = customSes.getId();
             //String user = (String) request.getAttribute("user");
-            System.out.println("\nrequest session id: " + sid );  //+ " user: " + user);
+            //System.out.println("\nrequest session id: " + sid );  //+ " user: " + user);
             var st = customSes.getThread();
             if (st == null) {
                 System.out.println("no thread for session!");
@@ -65,10 +66,8 @@ public class ThreadTypeHandler extends Handler.Wrapper {
                 UrlEncoded.decodeTo(query, queryMap, StandardCharsets.UTF_8);
             }
 
-            // register these paths using annotations on GenericController implementations?
-            // then call the annotated function on match
-            if ("/timesheet.html".equals(path) ) { //|| "/tsc2/".equals(path)) { // or /tsc2/timesheet
-                Class<?> ctl_class = TscController.class;
+            Class<?> ctl_class = ControllerRegistry.getController(path.replace(".html","").replace("/",""));
+            if (ctl_class != null) { //|| "/timesheet2/".equals(path)) { // or /timesheet2/timesheet
                 
                 //var eq = (BlockingQueue<UpdateMessage>) ses.getAttribute("initialQueue");
                 GenericThread gt = customSes.getThread();
@@ -76,23 +75,21 @@ public class ThreadTypeHandler extends Handler.Wrapper {
                 GenericController ctlr = gt.getController();
                 if (ctlr == null) {
                     var setCtlr = new SetController();
-                    // class should be based on the URL path - /ctlr/tsc2 = TscController
-                    // generate this mapping using an Annotation?
-                    var tsc = (GenericController) ctl_class.getDeclaredConstructor().newInstance();
-                    ((TscController) tsc).querySetup(queryMap);  // can this be merged with queryNavigated()?
+                    var controller = (GenericController) ctl_class.getDeclaredConstructor().newInstance();
+                    controller.querySetup(queryMap);  // can this be merged with queryNavigated()?
                     //if (user != null) {
                     //    setCtlr.user = user; // let controller do Hibernate find(TsUser.class) since we can't block in handler
                     //}
-                    setCtlr.controller = (GenericController) tsc;
-                    System.out.println("setting controller to TscController" + eq);
+                    setCtlr.controller = controller;
+                    System.out.println("setting controller to Timesheet" + eq);
                     var ret = eq.offer(setCtlr);
-                    System.out.println("setting controller to TscController done." + ret);
+                    System.out.println("setting controller to Timesheet done." + ret);
                 } else {
                     System.out.println("found thread, but has controller!");
                     // if same controller already, the rest is ok?
                     if (ctlr.getClass().equals(ctl_class)) {
                         System.out.println("not init, found eventQueue");
-                        UpdateMessage um = TscController.queryNavigated(queryMap);  // trigger browser reload()
+                        UpdateMessage um = ctlr.queryNavigated(queryMap);  // trigger browser reload()
                         if (um != null) {
                             eq.offer(um);
                         }
@@ -107,7 +104,7 @@ public class ThreadTypeHandler extends Handler.Wrapper {
                 }
                 
             } else {
-                //System.out.println("not a known controller");
+                System.out.println("not a known controller" + path);
             }
         } else {
             System.out.println("request without session!");

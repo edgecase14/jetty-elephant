@@ -195,6 +195,12 @@
         <artifactId>jsystemd-core</artifactId>
         <version>3.1.1</version>
     </dependency>
+    
+    <dependency>
+      <groupId>com.google.auto.service</groupId>
+      <artifactId>auto-service</artifactId>
+      <version>1.1.1</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -293,16 +299,73 @@
             </systemProperties>
           </configuration>
         </plugin>
+        <!-- 2) Staged compiler runs -->
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
-          <configuration>
-            <compilerArgs>
-              <arg>-Xlint:deprecation</arg>
-              <arg>-Xlint:removal</arg>
-              <arg>-Xlint:unchecked</arg>
-            </compilerArgs>
-          </configuration>
+          <version>3.11.0</version>
+
+          <executions>
+            <!-- (A) Compile ONLY the processor classes into target/apt-classes -->
+            <execution>
+              <id>compile-annotation-processor</id>
+              <phase>generate-sources</phase>
+              <goals><goal>compile</goal></goals>
+              <configuration>
+                <!-- Do not run APT here, just compile the processor -->
+                <proc>none</proc>
+                <!-- Restrict to the processor package -->
+                <includes>
+                  <include>**/processor/**</include>
+                  <include>**/annotations/**</include>
+                </includes>
+                <!-- Put compiled processor classes in a private folder -->
+                <outputDirectory>${project.build.directory}/apt-classes</outputDirectory>
+              </configuration>
+            </execution>
+
+            <!-- (B) Run APT ONLY to generate sources (no class emission) -->
+            <execution>
+              <id>run-apt-generate-sources</id>
+              <phase>generate-sources</phase>
+              <goals><goal>compile</goal></goals>
+              <configuration>
+                <!-- Generate only; do not compile anything yet -->
+                <proc>only</proc>
+
+                <!-- Tell javac which processor class to run -->
+                <annotationProcessors>
+                  <annotationProcessor>net.coplanar.processor.ControllerProcessor</annotationProcessor>
+                </annotationProcessors>
+
+                <!-- Point processorpath at the classes we just built -->
+                <compilerArgs>
+                  <arg>-processorpath</arg>
+                  <arg>${project.build.directory}/apt-classes</arg>
+                </compilerArgs>
+
+                <!-- Where generated sources go -->
+                <generatedSourcesDirectory>
+                  ${project.build.directory}/generated-sources/annotations
+                </generatedSourcesDirectory>
+              </configuration>
+            </execution>
+
+            <!-- (C) Normal compile at the regular 'compile' phase -->
+            <execution>
+              <id>compile-main</id>
+              <phase>compile</phase>
+              <goals><goal>compile</goal></goals>
+              <configuration>
+                <proc>none</proc>
+                <compilerArgs>
+                  <arg>-Xlint:deprecation</arg>
+                  <arg>-Xlint:removal</arg>
+                  <arg>-Xlint:unchecked</arg>
+                </compilerArgs>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
@@ -331,6 +394,36 @@
     </pluginManagement>
     
     <plugins>
+      <!-- 1) Make Maven treat src/apt/java as an extra source root -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-apt-source</id>
+            <phase>generate-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>${project.basedir}/src/apt/java</source>
+              </sources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>add-generated-sources</id>
+            <phase>generate-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/annotations</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
@@ -389,6 +482,62 @@
                   <filtering>false</filtering>
                 </resource>
               </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <!-- Add staged compiler after existing plugins -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <executions>
+          <!-- (A) Compile ONLY the processor classes into target/apt-classes -->
+          <execution>
+            <id>compile-annotation-processor</id>
+            <phase>generate-sources</phase>
+            <goals><goal>compile</goal></goals>
+            <configuration>
+              <proc>none</proc>
+              <includes>
+                <include>**/processor/**</include>
+                <include>**/annotations/**</include>
+              </includes>
+              <outputDirectory>${project.build.directory}/apt-classes</outputDirectory>
+            </configuration>
+          </execution>
+
+          <!-- (B) Run APT ONLY to generate sources -->
+          <execution>
+            <id>run-apt-generate-sources</id>
+            <phase>generate-sources</phase>
+            <goals><goal>compile</goal></goals>
+            <configuration>
+              <proc>only</proc>
+              <annotationProcessors>
+                <annotationProcessor>net.coplanar.processor.ControllerProcessor</annotationProcessor>
+              </annotationProcessors>
+              <compilerArgs>
+                <arg>-processorpath</arg>
+                <arg>${project.build.directory}/apt-classes</arg>
+              </compilerArgs>
+              <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+            </configuration>
+          </execution>
+
+          <!-- (C) Normal compile at the regular 'compile' phase -->
+          <execution>
+            <id>compile-main</id>
+            <phase>compile</phase>
+            <goals><goal>compile</goal></goals>
+            <configuration>
+              <proc>none</proc>
+              <compilerArgs>
+                <arg>-Xlint:deprecation</arg>
+                <arg>-Xlint:removal</arg>
+                <arg>-Xlint:unchecked</arg>
+              </compilerArgs>
             </configuration>
           </execution>
         </executions>

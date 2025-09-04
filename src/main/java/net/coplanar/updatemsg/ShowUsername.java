@@ -4,7 +4,7 @@
  */
 package net.coplanar.updatemsg;
 
-import net.coplanar.app.GenericController;
+import net.coplanar.controller.GenericController;
 
 /**
  *
