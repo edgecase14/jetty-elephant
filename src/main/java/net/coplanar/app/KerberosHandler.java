@@ -304,6 +304,8 @@ public class KerberosHandler extends Handler.Wrapper {
             }
 
         }
-        return false; // WTF
+        
+        // Pass request to next handler in chain
+        return super.handle(request, response, callback);
     }
 }

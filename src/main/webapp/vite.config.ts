@@ -8,8 +8,8 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'src/main.ts'),
-        timesheet: resolve(__dirname, 'src/timesheet.html'),
+        timesheet: resolve(__dirname, 'src/timesheet.ts'),
+        'ctlr/timesheet': resolve(__dirname, 'src/ctlr/timesheet.html'),
         index: resolve(__dirname, 'src/index.html')
       },
       output: {

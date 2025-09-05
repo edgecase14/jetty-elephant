@@ -46,7 +46,7 @@ public final class SseHandler extends Handler.Abstract.NonBlocking {
         if (last_event_id != null) {
             try {
                 last_id = Integer.parseInt(last_event_id);
-                //System.out.println("Converted number: " + number);
+                System.out.println("Converted event number: " + last_id);
             } catch (NumberFormatException e) {
                 System.out.println("Invalid number format: " + last_event_id);
             }
@@ -70,7 +70,12 @@ public final class SseHandler extends Handler.Abstract.NonBlocking {
             callbacks.put(response, callback);
             //System.out.println("SseHandler WITH session");
             // no callback is suspicious - what keeps multiple writes in sequence?  maybe use synchronous version?
-            write(response, "data: { \"type\" : \"bar\" }\n\n", Callback.NOOP);  // doesn't complete open unless write something... empty string works on chrome, not on ff
+            String junk = (String) request.getAttribute("newSession");
+	    if (junk == null) {
+                write(response, "data: { \"type\" : \"bar\" }\n\n", Callback.NOOP);  // doesn't complete open unless write something... empty string works on chrome, not on ff
+            } else {
+                write(response, "data: [ { \"type\" : \"Reload\" } ]\n\n", Callback.NOOP);  // server restart likely
+            }
             // no callback is suspicious
             //if (last_id == queued tail?) {
             //    response.write(false, null, null);

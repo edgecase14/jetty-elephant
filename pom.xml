@@ -542,6 +542,40 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!-- Generate TypeScript definitions from Java UpdateMessage classes -->
+      <plugin>
+        <groupId>cz.habarta.typescript-generator</groupId>
+        <artifactId>typescript-generator-maven-plugin</artifactId>
+        <version>3.2.1263</version>
+        <executions>
+          <execution>
+            <id>generate-ts-models</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- Tell the plugin to read Jackson annotations -->
+              <jsonLibrary>jackson2</jsonLibrary>
+              <!-- Emit declaration file -->
+              <outputKind>global</outputKind>
+              <outputFileType>declarationFile</outputFileType>
+              <!-- Where to write the types -->
+              <outputFile>src/main/webapp/src/types/generated.d.ts</outputFile>
+              
+              <!-- Include polymorphic family by base type -->
+              <classesExtendingClasses>
+                <class>net.coplanar.updatemsg.UpdateMessage</class>
+              </classesExtendingClasses>
+              
+              <!-- Map as interfaces for declaration file -->
+              <mapClasses>asInterfaces</mapClasses>
+              <mapEnum>asEnum</mapEnum>
+              <nonConstEnums>false</nonConstEnums>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

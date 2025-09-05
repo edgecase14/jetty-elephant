@@ -34,6 +34,8 @@ export class mrSock {
         this.evtSource = new EventSource(this.url);
 
         // Handle connection open
+	// Firefox retries every 10 seconds to re-open
+	// 500 or 403 Unauthorized (expired Kerberos ticket) causes it to stop
         const myonopen = function (event) {
             if (this.statusElement) {
                 this.statusElement.innerText = this.url + " open";
@@ -79,7 +81,9 @@ export class mrSock {
 
     // Dispatch a single message to its registered handler
     dispatchOne(updatemsg) {
-        if (updatemsg.type === "Reload") {
+        if (updatemsg.type.toString() === "Reload") {
+            // thought this might tidy up javascript console - error about reload interrupting eventsource
+            //this.evtSource.close();
             window.location.reload();
             return;
         }
@@ -95,7 +99,7 @@ export class mrSock {
     send(updatemsg) {
         updatemsg.type = updatemsg.constructor.name;
         let jsn = JSON.stringify(updatemsg);
-        fetch('tsc2/', {
+        fetch('/tsc2/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

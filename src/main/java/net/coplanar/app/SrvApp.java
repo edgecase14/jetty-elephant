@@ -614,18 +614,28 @@ public class SrvApp
         //resourceHandler.setHandler(handler);
         ContextHandler hwctx = new ContextHandler(new SseHandler(server.getThreadPool()), "/sse2");
         ContextHandler postit = new ContextHandler(new Tsc2(), "/tsc2");
+        
+        // Create ResourceHandler for /ctlr/ path to serve timesheet.html
+        ResourceHandler ctlrResourceHandler = new ResourceHandler();
+        ctlrResourceHandler.setBaseResource(ResourceFactory.of(ctlrResourceHandler).newResource("target/classes/static/"));
+        ctlrResourceHandler.setDirAllowed(false);
+        ctlrResourceHandler.setAcceptRanges(true);
+        
+        var sthread = new ThreadTypeHandler(ctlrResourceHandler);  // chain to resource handler
+        ContextHandler thread_type = new ContextHandler(sthread, "/ctlr");
                 
         
         ContextHandlerCollection contexts = new ContextHandlerCollection(false);  // keep things nonblocking
         contexts.addHandler(resourceHandler);
         contexts.addHandler(postit);
         contexts.addHandler(hwctx);
+        contexts.addHandler(thread_type);
 
         
-        //Handler sthread = new SessionThreadHandler(contexts);
-        var sthread = new ThreadTypeHandler(contexts);  // *after* session created
+        //var sthread = new ThreadTypeHandler(contexts);  // *after* session created
 
-        var kh = new KerberosHandler(sthread);
+        //var kh = new KerberosHandler(sthread);
+        var kh = new KerberosHandler(contexts);
         
         // Create and link the CustomSessionHandler.
         CustomSessionHandler sessionHandler = new CustomSessionHandler(kh);
@@ -633,11 +643,6 @@ public class SrvApp
         // configure kh to use it
         kh.setSessionHandler(sessionHandler);
  
-        // F1
-        //var threadListener = new ThreadSessionLifecycleListener();
-        //server.setAttribute("sessionListener", threadListener);
-        
-        //server.setHandler(new KerberosHandler(sessionHandler));
         server.setHandler(sessionHandler);
         
         //server.setHandler(contexts);

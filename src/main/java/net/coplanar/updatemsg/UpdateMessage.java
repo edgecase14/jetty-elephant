@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonTypeInfo(use=Id.SIMPLE_NAME, include=As.PROPERTY, property="type") // Include Java class simple-name as JSON property "type"
+@JsonTypeInfo(use=Id.NAME, include=As.PROPERTY, property="type") // Include Java class name as JSON property "type"
 // could omit outbound-only messages?
 @JsonSubTypes({@Type(CellUpdate.class), @Type(CellList.class), @Type(GotRow.class), @Type(ShowUsername.class), @Type(PointAdd.class)}) // Required for deserialization only  
 public abstract class UpdateMessage {

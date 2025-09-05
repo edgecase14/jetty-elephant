@@ -35,6 +35,10 @@ public class CustomSessionHandler extends Handler.Wrapper {
 
     @Override
     public boolean handle(Request request, Response response, Callback callback) throws Exception {
+        // Print request URL to console
+        String requestUrl = request.getHttpURI().toString();
+        System.out.println("CustomSession handling request URL: " + requestUrl);
+        
         // Get existing session only (don't create)
         CustomSession session = getSession(request, false);
         if (session != null) {
@@ -71,6 +75,7 @@ public class CustomSessionHandler extends Handler.Wrapper {
             session = sessions.get(sessionId);
             if (session != null && session.isExpired(maxInactiveInterval)) {
                 // Session expired, remove it
+		// this logic needs re-thinking, since it contains a live thread
                 sessions.remove(sessionId);
                 session = null;
             }
@@ -78,6 +83,12 @@ public class CustomSessionHandler extends Handler.Wrapper {
 
         // Create new session if none found or expired and create=true
         if (session == null && create) {
+
+        if (sessionId != null) {
+            // can happen after server restart - useful?
+            System.out.println("CustomSession: cookie didn't match existing session");
+            request.setAttribute("newSession", (String) "true");
+	}
             sessionId = generateSessionId();
             session = new CustomSession(sessionId);
             sessions.put(sessionId, session);
@@ -93,6 +104,9 @@ public class CustomSessionHandler extends Handler.Wrapper {
                 
                 Response.addCookie(response, sessionCookie);
             }
+            
+            // Set request attribute so downstream handlers can find the new session
+            request.setAttribute("customSession", session);
         }
 
         return session;
